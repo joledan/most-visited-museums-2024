@@ -1,0 +1,12 @@
+---
+title: "Most Visited Museums 2024"
+author: "Jan Oledan"
+abstract: "Analysis of most visited art museums in 2024"
+---
+
+Write your analysis in this file. You can use Markdown, LaTeX, and code blocks.
+
+```{r}
+#| output: false
+library(tidyverse)
+```
