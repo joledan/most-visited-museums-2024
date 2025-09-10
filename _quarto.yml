@@ -1,5 +1,5 @@
 project:
-  output-dir: publish
+  output-dir: docs
   execute-dir: project
 number-sections: false
 toc: true
