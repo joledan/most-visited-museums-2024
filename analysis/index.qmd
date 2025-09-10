@@ -6,9 +6,26 @@ format:
   html: default
 ---
 
-Write your analysis in this file. You can use Markdown, LaTeX, and code blocks.
-
 ```{r}
 #| output: false
 library(tidyverse)
+library(rvest)
+library(janitor)
+library(stringr)
+
+url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
+
+# get url, table, clean column names
+df <- read_html(url) %>%
+    html_node("table.wikitable") %>%
+    html_table(fill = TRUE) %>%
+    clean_names() %>%
+    mutate(
+        visitors_annually = str_replace_all(visitors_annually, ", ", ","), 
+        year = str_extract(visitors_annually, "(?<=\\().+(?=\\))") %>% as.numeric(), 
+        visitors = str_extract(visitors_annually, "^[^\\s]+") %>% str_replace_all(., ",", "") %>% as.numeric(),
+        rank = rank(-visitors)
+        ) %>%
+    select(rank, museum, country_and_city, year, visitors) %>% 
+    arrange(rank)
 ```
