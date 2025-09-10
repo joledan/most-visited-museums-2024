@@ -1,5 +1,5 @@
 # Published reports
-publish/*
+# publish/*
 !publish/.gitkeep
 
 # Data
@@ -163,3 +163,4 @@ target/
 # IPython
 profile_default/
 ipython_config.py
+**/*.quarto_ipynb
