@@ -3332,7 +3332,13 @@ flex: 0 0 auto;
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
 <div id="quarto-sidebar-toc-left" class="sidebar toc-left">
-  
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#to-do" id="toc-to-do" class="nav-link active" data-scroll-target="#to-do">To-do</a></li>
+  </ul>
+</nav>
 </div>
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
 </div>
@@ -3376,6 +3382,14 @@ flex: 0 0 auto;
 </header>
 
 
+<section id="to-do" class="level2">
+<h2 class="anchored" data-anchor-id="to-do">To-do</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">Bubble plot</label></li>
+<li><label><input type="checkbox">Add flags</label></li>
+<li><label><input type="checkbox">Writing</label></li>
+<li><label><input type="checkbox">Fix spacing in text</label></li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3393,50 +3407,42 @@ flex: 0 0 auto;
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gfonts)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfonts)</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># register_font(</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   name = &quot;Sora&quot;,</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   plain = paste0(getwd(), &quot;/data/fonts/Sora/static/Sora-Regular.ttf&quot;),</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   bold = paste0(getwd(), &quot;/data/fonts/Sora/static/Sora-Bold.ttf&quot;)</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># subset(system_fonts(), family == &quot;Sora&quot;)</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">&quot;https://en.wikipedia.org/wiki/List_of_most-visited_art_museums&quot;</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># get url, table, clean column names</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url) <span class="sc">%&gt;%</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_node</span>(<span class="st">&quot;table.wikitable&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_table</span>(<span class="at">fill =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">museum =</span> <span class="fu">str_remove</span>(museum,  <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s*</span><span class="sc">\\</span><span class="st">([^</span><span class="sc">\\</span><span class="st">)]+</span><span class="sc">\\</span><span class="st">)&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_trim</span>(), </span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">paste</span>(museum, country_and_city, <span class="at">sep =</span> <span class="st">&quot;, &quot;</span>),</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">case_when</span>(</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            address <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Gyeongju National Museum, Gyeongju&quot;</span>,</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Gwacheon&quot;</span>,</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Seoul&quot;</span>, </span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Korea, Seoul&quot;</span>, </span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Folk Museum of Korea, Seoul&quot;</span>) <span class="sc">~</span> <span class="fu">paste0</span>(address, <span class="st">&quot;, South Korea&quot;</span>),</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> address</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors_annually =</span> <span class="fu">str_replace_all</span>(visitors_annually, <span class="st">&quot;, &quot;</span>, <span class="st">&quot;,&quot;</span>), </span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;(?&lt;=</span><span class="sc">\\</span><span class="st">().+(?=</span><span class="sc">\\</span><span class="st">))&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>(), </span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;^[^</span><span class="sc">\\</span><span class="st">s]+&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_replace_all</span>(., <span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>),</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">case_when</span>( <span class="co"># fix value of NPG</span></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            museum <span class="sc">==</span> <span class="st">&quot;National Portrait Gallery&quot;</span> <span class="sc">~</span> <span class="st">&quot;1578065&quot;</span>,</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> visitors),</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">as.numeric</span>(visitors)<span class="sc">/</span><span class="dv">1000000</span>, </span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">rank =</span> <span class="fu">rank</span>(<span class="sc">-</span>visitors)</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geocode</span>(address, <span class="at">method =</span> <span class="st">&#39;arcgis&#39;</span>, <span class="at">full_results =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(rank, museum, visitors, year, address, </span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        lat, long, </span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="at">score =</span> attributes.Score,</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">iso3 =</span> attributes.Country,</span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">country =</span> attributes.CntryName) <span class="sc">%&gt;%</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(rank)</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="fu">write_delim</span>(df, <span class="fu">paste0</span>(<span class="st">&quot;./data/out/most_visited_museums_2024.csv&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">&quot;https://en.wikipedia.org/wiki/List_of_most-visited_art_museums&quot;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># get url, table, clean column names</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url) <span class="sc">%&gt;%</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_node</span>(<span class="st">&quot;table.wikitable&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_table</span>(<span class="at">fill =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">museum =</span> <span class="fu">str_remove</span>(museum,  <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s*</span><span class="sc">\\</span><span class="st">([^</span><span class="sc">\\</span><span class="st">)]+</span><span class="sc">\\</span><span class="st">)&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_trim</span>(), </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">paste</span>(museum, country_and_city, <span class="at">sep =</span> <span class="st">&quot;, &quot;</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">case_when</span>(</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>            address <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Gyeongju National Museum, Gyeongju&quot;</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Gwacheon&quot;</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Seoul&quot;</span>, </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Korea, Seoul&quot;</span>, </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Folk Museum of Korea, Seoul&quot;</span>) <span class="sc">~</span> <span class="fu">paste0</span>(address, <span class="st">&quot;, South Korea&quot;</span>),</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> address</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors_annually =</span> <span class="fu">str_replace_all</span>(visitors_annually, <span class="st">&quot;, &quot;</span>, <span class="st">&quot;,&quot;</span>), </span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;(?&lt;=</span><span class="sc">\\</span><span class="st">().+(?=</span><span class="sc">\\</span><span class="st">))&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>(), </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;^[^</span><span class="sc">\\</span><span class="st">s]+&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_replace_all</span>(., <span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">case_when</span>( <span class="co"># fix value of NPG</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            museum <span class="sc">==</span> <span class="st">&quot;National Portrait Gallery&quot;</span> <span class="sc">~</span> <span class="st">&quot;1578065&quot;</span>,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> visitors),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">as.numeric</span>(visitors)<span class="sc">/</span><span class="dv">1000000</span>, </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">rank =</span> <span class="fu">rank</span>(<span class="sc">-</span>visitors)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geocode</span>(address, <span class="at">method =</span> <span class="st">&#39;arcgis&#39;</span>, <span class="at">full_results =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(rank, museum, visitors, year, address, </span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        lat, long, </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        <span class="at">score =</span> attributes.Score,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">iso3 =</span> attributes.Country,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">country =</span> attributes.CntryName) <span class="sc">%&gt;%</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(rank)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="fu">write_delim</span>(df, <span class="fu">paste0</span>(<span class="st">&quot;./data/out/most_visited_museums_2024.csv&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
@@ -3531,6 +3537,7 @@ flex: 0 0 auto;
 </div>
 <!-- -->
 
+</section>
 
 </main>
 <!-- /main column -->
@@ -4006,161 +4013,160 @@ flex: 0 0 auto;
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html: default</span></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#| error: false</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggiraph)</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidygeocoder)</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(showtext)</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gdtools)</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gfonts)</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfonts)</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co"># register_font(</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   name = &quot;Sora&quot;,</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#   plain = paste0(getwd(), &quot;/data/fonts/Sora/static/Sora-Regular.ttf&quot;),</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#   bold = paste0(getwd(), &quot;/data/fonts/Sora/static/Sora-Bold.ttf&quot;)</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co"># subset(system_fonts(), family == &quot;Sora&quot;)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## To-do</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Bubble plot</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Add flags</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Writing </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Fix spacing in text </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#| error: false</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggiraph)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidygeocoder)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(showtext)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gdtools)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gfonts)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(systemfonts)</span>
 <span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">&quot;https://en.wikipedia.org/wiki/List_of_most-visited_art_museums&quot;</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co"># get url, table, clean column names</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url) <span class="sc">%&gt;%</span></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_node</span>(<span class="st">&quot;table.wikitable&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_table</span>(<span class="at">fill =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">museum =</span> <span class="fu">str_remove</span>(museum,  <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s*</span><span class="sc">\\</span><span class="st">([^</span><span class="sc">\\</span><span class="st">)]+</span><span class="sc">\\</span><span class="st">)&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_trim</span>(), </span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">paste</span>(museum, country_and_city, <span class="at">sep =</span> <span class="st">&quot;, &quot;</span>),</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">case_when</span>(</span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>            address <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Gyeongju National Museum, Gyeongju&quot;</span>,</span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Gwacheon&quot;</span>,</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Seoul&quot;</span>, </span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Korea, Seoul&quot;</span>, </span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Folk Museum of Korea, Seoul&quot;</span>) <span class="sc">~</span> <span class="fu">paste0</span>(address, <span class="st">&quot;, South Korea&quot;</span>),</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> address</span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors_annually =</span> <span class="fu">str_replace_all</span>(visitors_annually, <span class="st">&quot;, &quot;</span>, <span class="st">&quot;,&quot;</span>), </span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;(?&lt;=</span><span class="sc">\\</span><span class="st">().+(?=</span><span class="sc">\\</span><span class="st">))&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>(), </span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;^[^</span><span class="sc">\\</span><span class="st">s]+&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_replace_all</span>(., <span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>),</span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">case_when</span>( <span class="co"># fix value of NPG</span></span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>            museum <span class="sc">==</span> <span class="st">&quot;National Portrait Gallery&quot;</span> <span class="sc">~</span> <span class="st">&quot;1578065&quot;</span>,</span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> visitors),</span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">as.numeric</span>(visitors)<span class="sc">/</span><span class="dv">1000000</span>, </span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">rank =</span> <span class="fu">rank</span>(<span class="sc">-</span>visitors)</span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geocode</span>(address, <span class="at">method =</span> <span class="st">&#39;arcgis&#39;</span>, <span class="at">full_results =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(rank, museum, visitors, year, address, </span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        lat, long, </span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">score =</span> attributes.Score,</span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">iso3 =</span> attributes.Country,</span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>        <span class="at">country =</span> attributes.CntryName) <span class="sc">%&gt;%</span></span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(rank)</span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="fu">write_delim</span>(df, <span class="fu">paste0</span>(<span class="st">&quot;./data/out/most_visited_museums_2024.csv&quot;</span>))</span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| error: false</span></span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="co"># read data from previous scraping</span></span>
-<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(<span class="fu">paste0</span>(<span class="st">&quot;./data/out/most_visited_museums_2024.csv&quot;</span>)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">visitors =</span> <span class="fu">round</span>(visitors, <span class="dv">1</span>))</span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="co"># colour palette</span></span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>mcb_palette <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Blue&quot;</span> <span class="ot">=</span> <span class="st">&quot;#5E7F9B&quot;</span>,</span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Teal&quot;</span> <span class="ot">=</span> <span class="st">&quot;#3B7D6C&quot;</span>,</span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Orange&quot;</span> <span class="ot">=</span> <span class="st">&quot;#E07A3F&quot;</span>,</span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Wine&quot;</span> <span class="ot">=</span> <span class="st">&quot;#762A3B&quot;</span>,</span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Ochre&quot;</span> <span class="ot">=</span> <span class="st">&quot;#C49E4E&quot;</span>,</span>
-<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Grey Pink&quot;</span> <span class="ot">=</span> <span class="st">&quot;#C4A69F&quot;</span>,</span>
-<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Charcoal&quot;</span> <span class="ot">=</span> <span class="st">&quot;#2E2E2E&quot;</span>,</span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;White&quot;</span> <span class="ot">=</span> <span class="st">&quot;#F2EEE3&quot;</span>,</span>
-<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Grey&quot;</span> <span class="ot">=</span> <span class="st">&quot;#A49E94&quot;</span></span>
-<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df <span class="sc">%&gt;%</span> </span>
-<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(rank <span class="sc">&lt;=</span> <span class="dv">10</span>), </span>
-<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(museum, visitors), </span>
-<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> visitors)) <span class="sc">+</span> </span>
-<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar_interactive</span>(<span class="fu">aes</span>(<span class="at">tooltip =</span> visitors), </span>
-<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>        <span class="at">stat =</span> <span class="st">&quot;identity&quot;</span>,</span>
-<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>        <span class="at">fill =</span> mcb_palette[<span class="st">&quot;Blue&quot;</span>]) <span class="sc">+</span> </span>
-<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> visitors, <span class="at">y =</span> visitors<span class="fl">-0.5</span>), </span>
-<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        <span class="co">#position = position_stack(vjust = 0.9), </span></span>
-<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        <span class="at">color =</span> mcb_palette[<span class="st">&quot;White&quot;</span>],  <span class="co"># Text color inside bar</span></span>
-<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>        <span class="at">family =</span> <span class="st">&quot;Sora&quot;</span>, </span>
-<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>        <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
-<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">&quot;Down the back, but who cares, still the Louvre&quot;</span>,</span>
-<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>        <span class="at">subtitle =</span> <span class="st">&quot;Number of visitors in 2024*, millions&quot;</span>,</span>
-<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;Source: Wikipedia. *Most recent visitor values from 2023 or 2024.&quot;</span>,</span>
-<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">&quot;&quot;</span>, </span>
-<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
-<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(</span>
-<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>        <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), </span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>        <span class="at">position =</span> <span class="st">&quot;right&quot;</span>,</span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>        <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">8</span>)) <span class="sc">+</span> </span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">&quot;Sora&quot;</span>) <span class="sc">+</span> </span>
-<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>        <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Sora&quot;</span>),</span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Axis lines</span></span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>),</span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line.y =</span> <span class="fu">element_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> mcb_palette[<span class="st">&quot;Charcoal&quot;</span>]),</span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line.x =</span> <span class="fu">element_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> mcb_palette[<span class="st">&quot;Charcoal&quot;</span>]),</span>
-<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>        <span class="co">#axis.line.x.top = element_line(color = &quot;black&quot;),  # show top x-axis line</span></span>
-<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>        <span class="co"># text</span></span>
-<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">0</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">5</span>, <span class="at">l=</span><span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)),</span>
-<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">0</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">10</span>, <span class="at">l=</span><span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)),</span>
-<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">10</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">0</span>, <span class="at">l=</span><span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)), </span>
-<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>        <span class="co"># title, subtitle position </span></span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title.position =</span> <span class="st">&quot;plot&quot;</span>, </span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption.position =</span>  <span class="st">&quot;plot&quot;</span>,</span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>        <span class="co"># margin for top axis title and ticks</span></span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>        <span class="co">#axis.title.x.top = element_text(margin = margin(b = 10)),</span></span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x.top =</span> <span class="fu">element_text</span>(<span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">5</span>), <span class="at">size =</span> <span class="dv">12</span>),</span>
-<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">size =</span> <span class="dv">12</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">0</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">0</span>, <span class="at">l=</span><span class="sc">-</span><span class="dv">12</span>, <span class="st">&quot;pt&quot;</span>)),</span>
-<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Optional: give plot more breathing room</span></span>
-<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>        <span class="co">#plot.margin = margin(t = 20, r = 20, b = 20, l = 20),</span></span>
-<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>        <span class="co"># grid lines</span></span>
-<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>()</span>
-<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a><span class="fu">girafe</span>(<span class="at">ggobj =</span> p, <span class="at">width_svg =</span> <span class="dv">8</span>, <span class="at">height_svg =</span> <span class="dv">6</span>)</span>
-<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">&quot;https://en.wikipedia.org/wiki/List_of_most-visited_art_museums&quot;</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="co"># get url, table, clean column names</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url) <span class="sc">%&gt;%</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_node</span>(<span class="st">&quot;table.wikitable&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_table</span>(<span class="at">fill =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">museum =</span> <span class="fu">str_remove</span>(museum,  <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s*</span><span class="sc">\\</span><span class="st">([^</span><span class="sc">\\</span><span class="st">)]+</span><span class="sc">\\</span><span class="st">)&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_trim</span>(), </span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">paste</span>(museum, country_and_city, <span class="at">sep =</span> <span class="st">&quot;, &quot;</span>),</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">address =</span> <span class="fu">case_when</span>(</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>            address <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Gyeongju National Museum, Gyeongju&quot;</span>,</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Gwacheon&quot;</span>,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Modern and Contemporary Art, Seoul&quot;</span>, </span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Museum of Korea, Seoul&quot;</span>, </span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;National Folk Museum of Korea, Seoul&quot;</span>) <span class="sc">~</span> <span class="fu">paste0</span>(address, <span class="st">&quot;, South Korea&quot;</span>),</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> address</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors_annually =</span> <span class="fu">str_replace_all</span>(visitors_annually, <span class="st">&quot;, &quot;</span>, <span class="st">&quot;,&quot;</span>), </span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;(?&lt;=</span><span class="sc">\\</span><span class="st">().+(?=</span><span class="sc">\\</span><span class="st">))&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>(), </span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">str_extract</span>(visitors_annually, <span class="st">&quot;^[^</span><span class="sc">\\</span><span class="st">s]+&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">str_replace_all</span>(., <span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>),</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">case_when</span>( <span class="co"># fix value of NPG</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>            museum <span class="sc">==</span> <span class="st">&quot;National Portrait Gallery&quot;</span> <span class="sc">~</span> <span class="st">&quot;1578065&quot;</span>,</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>            <span class="cn">TRUE</span> <span class="sc">~</span> visitors),</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">visitors =</span> <span class="fu">as.numeric</span>(visitors)<span class="sc">/</span><span class="dv">1000000</span>, </span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">rank =</span> <span class="fu">rank</span>(<span class="sc">-</span>visitors)</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geocode</span>(address, <span class="at">method =</span> <span class="st">&#39;arcgis&#39;</span>, <span class="at">full_results =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(rank, museum, visitors, year, address, </span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        lat, long, </span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">score =</span> attributes.Score,</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">iso3 =</span> attributes.Country,</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">country =</span> attributes.CntryName) <span class="sc">%&gt;%</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(rank)</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="fu">write_delim</span>(df, <span class="fu">paste0</span>(<span class="st">&quot;./data/out/most_visited_museums_2024.csv&quot;</span>))</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="co">#| error: false</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a><span class="co"># read data from previous scraping</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(<span class="fu">paste0</span>(<span class="st">&quot;./data/out/most_visited_museums_2024.csv&quot;</span>)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">visitors =</span> <span class="fu">round</span>(visitors, <span class="dv">1</span>))</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a><span class="co"># colour palette</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>mcb_palette <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Blue&quot;</span> <span class="ot">=</span> <span class="st">&quot;#5E7F9B&quot;</span>,</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Teal&quot;</span> <span class="ot">=</span> <span class="st">&quot;#3B7D6C&quot;</span>,</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Orange&quot;</span> <span class="ot">=</span> <span class="st">&quot;#E07A3F&quot;</span>,</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Wine&quot;</span> <span class="ot">=</span> <span class="st">&quot;#762A3B&quot;</span>,</span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Ochre&quot;</span> <span class="ot">=</span> <span class="st">&quot;#C49E4E&quot;</span>,</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Grey Pink&quot;</span> <span class="ot">=</span> <span class="st">&quot;#C4A69F&quot;</span>,</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Charcoal&quot;</span> <span class="ot">=</span> <span class="st">&quot;#2E2E2E&quot;</span>,</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;White&quot;</span> <span class="ot">=</span> <span class="st">&quot;#F2EEE3&quot;</span>,</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Grey&quot;</span> <span class="ot">=</span> <span class="st">&quot;#A49E94&quot;</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df <span class="sc">%&gt;%</span> </span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(rank <span class="sc">&lt;=</span> <span class="dv">10</span>), </span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(museum, visitors), </span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> visitors)) <span class="sc">+</span> </span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar_interactive</span>(<span class="fu">aes</span>(<span class="at">tooltip =</span> visitors), </span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>        <span class="at">stat =</span> <span class="st">&quot;identity&quot;</span>,</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>        <span class="at">fill =</span> mcb_palette[<span class="st">&quot;Blue&quot;</span>]) <span class="sc">+</span> </span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> visitors, <span class="at">y =</span> visitors<span class="fl">-0.5</span>), </span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>        <span class="co">#position = position_stack(vjust = 0.9), </span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        <span class="at">color =</span> mcb_palette[<span class="st">&quot;White&quot;</span>],  <span class="co"># Text color inside bar</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        <span class="at">family =</span> <span class="st">&quot;Sora&quot;</span>, </span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>        <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">&quot;Down the back, but who cares, still the Louvre&quot;</span>,</span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>        <span class="at">subtitle =</span> <span class="st">&quot;Number of visitors in 2024*, millions&quot;</span>,</span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;Source: Wikipedia. *Most recent visitor values from 2023 or 2024.&quot;</span>,</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">&quot;&quot;</span>, </span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>        <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), </span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>        <span class="at">position =</span> <span class="st">&quot;right&quot;</span>,</span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>        <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">8</span>)) <span class="sc">+</span> </span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_family =</span> <span class="st">&quot;Sora&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>        <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Sora&quot;</span>),</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Axis lines</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line.y =</span> <span class="fu">element_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> mcb_palette[<span class="st">&quot;Charcoal&quot;</span>]),</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line.x =</span> <span class="fu">element_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> mcb_palette[<span class="st">&quot;Charcoal&quot;</span>]),</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>        <span class="co">#axis.line.x.top = element_line(color = &quot;black&quot;),  # show top x-axis line</span></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>        <span class="co"># text</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">0</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">5</span>, <span class="at">l=</span><span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)),</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">0</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">10</span>, <span class="at">l=</span><span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)),</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">10</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">0</span>, <span class="at">l=</span><span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)), </span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>        <span class="co"># title, subtitle position </span></span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title.position =</span> <span class="st">&quot;plot&quot;</span>, </span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption.position =</span>  <span class="st">&quot;plot&quot;</span>,</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>        <span class="co"># margin for top axis title and ticks</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>        <span class="co">#axis.title.x.top = element_text(margin = margin(b = 10)),</span></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x.top =</span> <span class="fu">element_text</span>(<span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">5</span>), <span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">size =</span> <span class="dv">12</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="dv">0</span>, <span class="at">r=</span><span class="dv">0</span>, <span class="at">b=</span><span class="dv">0</span>, <span class="at">l=</span><span class="sc">-</span><span class="dv">12</span>, <span class="st">&quot;pt&quot;</span>)),</span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Optional: give plot more breathing room</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>        <span class="co">#plot.margin = margin(t = 20, r = 20, b = 20, l = 20),</span></span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>        <span class="co"># grid lines</span></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a><span class="fu">girafe</span>(<span class="at">ggobj =</span> p, <span class="at">width_svg =</span> <span class="dv">8</span>, <span class="at">height_svg =</span> <span class="dv">6</span>)</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a><span class="co"># df_sf &lt;- st_as_sf(df, coords = c(&quot;long&quot;, &quot;lat&quot;))</span></span>
-<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot() +</span></span>
-<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(data = df, aes(x = long, y = lat, size = visitors)) + scale_size(</span></span>
-<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a><span class="co">#     range = c(1, 9),</span></span>
-<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a><span class="co">#     guide = guide_legend(</span></span>
-<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a><span class="co">#       direction = &quot;horizontal&quot;,</span></span>
-<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a><span class="co">#       nrow = 1,</span></span>
-<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a><span class="co">#       label.position = &quot;bottom&quot;))</span></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a><span class="co"># df_sf &lt;- st_as_sf(df, coords = c(&quot;long&quot;, &quot;lat&quot;))</span></span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot() +</span></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(data = df, aes(x = long, y = lat, size = visitors)) + scale_size(</span></span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a><span class="co">#     range = c(1, 9),</span></span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a><span class="co">#     guide = guide_legend(</span></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a><span class="co">#       direction = &quot;horizontal&quot;,</span></span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a><span class="co">#       nrow = 1,</span></span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a><span class="co">#       label.position = &quot;bottom&quot;))</span></span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

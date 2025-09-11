@@ -6,6 +6,13 @@ format:
   html: default
 ---
 
+## To-do
+
+- [ ] Bubble plot
+- [ ] Add flags
+- [ ] Writing 
+- [ ] Fix spacing in text 
+
 ```{r}
 #| output: false
 #| eval: false
@@ -25,14 +32,6 @@ library(showtext)
 library(gdtools)
 library(gfonts)
 library(systemfonts)
-
-# register_font(
-#   name = "Sora",
-#   plain = paste0(getwd(), "/data/fonts/Sora/static/Sora-Regular.ttf"),
-#   bold = paste0(getwd(), "/data/fonts/Sora/static/Sora-Bold.ttf")
-# )
-# subset(system_fonts(), family == "Sora")
-
 
 url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
