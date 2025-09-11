@@ -8,6 +8,10 @@ format:
 
 ```{r}
 #| output: false
+#| eval: false
+#| warning: false
+#| error: false
+
 library(tidyverse)
 library(rvest)
 library(janitor)
@@ -65,11 +69,29 @@ df <- read_html(url) %>%
         country = attributes.CntryName) %>%
     arrange(rank)
 
+write_delim(df, paste0("./data/out/most_visited_museums_2024.csv"))
+
 ```
 
 ```{r}
+#| warning: false
+#| error: false
 
-# Barplot
+# read data from previous scraping
+df <- read_delim(paste0("./data/out/most_visited_museums_2024.csv")) %>% mutate(visitors = round(visitors, 1))
+
+# colour palette
+mcb_palette <- c(
+  "Blue" = "#5E7F9B",
+  "Teal" = "#3B7D6C",
+  "Orange" = "#E07A3F",
+  "Wine" = "#762A3B",
+  "Ochre" = "#C49E4E",
+  "Grey Pink" = "#C4A69F",
+  "Charcoal" = "#2E2E2E",
+  "White" = "#F2EEE3",
+  "Grey" = "#A49E94"
+)
 
 p <- ggplot(df %>% 
     filter(rank <= 10), 
@@ -77,12 +99,18 @@ p <- ggplot(df %>%
         y = visitors)) + 
     geom_bar_interactive(aes(tooltip = visitors), 
         stat = "identity",
-        fill = "steelblue") + 
+        fill = mcb_palette["Blue"]) + 
+    geom_text(aes(label = visitors, y = visitors-0.5), 
+        #position = position_stack(vjust = 0.9), 
+        color = mcb_palette["White"],  # Text color inside bar
+        family = "Sora", 
+        size = 5) +
     labs(
-        title = "This is the title of the plot",
-        subtitle = "This is the subtitle",
+        title = "Down the back, but who cares, still the Louvre",
+        subtitle = "Number of visitors in 2024*, millions",
+        caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
         x = "", 
-        y = "Visitors in 2024* (millions)") +
+        y = "") +
     scale_y_continuous(
         expand = c(0,0), 
         position = "right",
@@ -90,31 +118,35 @@ p <- ggplot(df %>%
     coord_flip() + 
     theme_minimal(base_family = "Sora") + 
     theme(
+        text = element_text(family = "Sora"),
         # Axis lines
         axis.line = element_line(color = "black", linewidth = 0.5),
-        axis.line.y = element_line(),
-        axis.line.x.top = element_line(color = "black"),  # show top x-axis line
+        axis.line.y = element_line(linewidth = 1, color = mcb_palette["Charcoal"]),
+        axis.line.x = element_line(linewidth = 1, color = mcb_palette["Charcoal"]),
+        #axis.line.x.top = element_line(color = "black"),  # show top x-axis line
         # text
-        plot.title = element_text(face = "bold", size = 16),
-        # title position 
+        plot.title = element_text(face = "bold", size = 20, margin = margin(t=0, r=0, b=5, l=0, "pt")),
+        plot.subtitle = element_text(size = 14, margin = margin(t=0, r=0, b=10, l=0, "pt")),
+        plot.caption = element_text(hjust = 0, margin = margin(t=10, r=0, b=0, l=0, "pt")), 
+
+        # title, subtitle position 
         plot.title.position = "plot", 
         plot.caption.position =  "plot",
-        # Margin for top axis title and ticks
-        axis.title.x.top = element_text(margin = margin(b = 10)),
-        axis.text.x.top = element_text(margin = margin(b = 5)),
-        axis.text.y = element_text(hjust = 0),
+        # margin for top axis title and ticks
+        #axis.title.x.top = element_text(margin = margin(b = 10)),
+        axis.text.x.top = element_text(margin = margin(b = 5), size = 12),
+        axis.text.y = element_text(hjust = 0, size = 12, margin = margin(t=0, r=0, b=0, l=-12, "pt")),
         # Optional: give plot more breathing room
-        plot.margin = margin(t = 20, r = 20, b = 20, l = 20),
-
+        #plot.margin = margin(t = 20, r = 20, b = 20, l = 20),
         # grid lines
         panel.grid.minor.x = element_blank(),
         panel.grid.major.y = element_blank()
-
     )
 
 girafe(ggobj = p, width_svg = 8, height_svg = 6)
 
 ```
+
 
 ```{r}
 
@@ -127,4 +159,6 @@ girafe(ggobj = p, width_svg = 8, height_svg = 6)
 #       direction = "horizontal",
 #       nrow = 1,
 #       label.position = "bottom"))
+
+
 ```
