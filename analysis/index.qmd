@@ -12,6 +12,8 @@ library(tidyverse)
 library(rvest)
 library(janitor)
 library(stringr)
+library(gt)
+library(tidygeocoder)
 
 url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
@@ -27,5 +29,13 @@ df <- read_html(url) %>%
         rank = rank(-visitors)
         ) %>%
     select(rank, museum, country_and_city, year, visitors) %>% 
-    arrange(rank)
+    arrange(rank) %>%
+    mutate(address = paste(museum, country_and_city, sep = ", ") )
+    
+    #  %>% 
+    # geocode(address, method = 'osm', full_results = TRUE)
+
+test <- df %>%
+    geocode(address, method = 'arcgis', full_results = TRUE)
+
 ```
