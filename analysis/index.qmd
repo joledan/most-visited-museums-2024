@@ -117,6 +117,7 @@ p <- ggplot(df %>%
     coord_flip() + 
     theme_minimal(base_family = "Sora") + 
     theme(
+        plot.margin = unit(c(10, 10, 10, 10), "pt"),
         text = element_text(family = "Sora"),
         # Axis lines
         axis.line = element_line(color = "black", linewidth = 0.5),
