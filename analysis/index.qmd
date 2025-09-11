@@ -17,6 +17,18 @@ library(ggplot2)
 library(ggiraph)
 library(tidygeocoder)
 library(sf)
+library(showtext)
+library(gdtools)
+library(gfonts)
+library(systemfonts)
+
+# register_font(
+#   name = "Sora",
+#   plain = paste0(getwd(), "/data/fonts/Sora/static/Sora-Regular.ttf"),
+#   bold = paste0(getwd(), "/data/fonts/Sora/static/Sora-Bold.ttf")
+# )
+# subset(system_fonts(), family == "Sora")
+
 
 url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
@@ -67,7 +79,8 @@ p <- ggplot(df %>%
         stat = "identity",
         fill = "steelblue") + 
     labs(
-        title = "Title",
+        title = "This is the title of the plot",
+        subtitle = "This is the subtitle",
         x = "", 
         y = "Visitors in 2024* (millions)") +
     scale_y_continuous(
@@ -75,12 +88,14 @@ p <- ggplot(df %>%
         position = "right",
         breaks = c(0, 4, 8)) + 
     coord_flip() + 
-    theme_minimal() + 
+    theme_minimal(base_family = "Sora") + 
     theme(
         # Axis lines
         axis.line = element_line(color = "black", linewidth = 0.5),
         axis.line.y = element_line(),
         axis.line.x.top = element_line(color = "black"),  # show top x-axis line
+        # text
+        plot.title = element_text(face = "bold", size = 16),
         # title position 
         plot.title.position = "plot", 
         plot.caption.position =  "plot",
@@ -98,7 +113,6 @@ p <- ggplot(df %>%
     )
 
 girafe(ggobj = p, width_svg = 8, height_svg = 6)
-
 
 ```
 
