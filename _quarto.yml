@@ -2,7 +2,7 @@ project:
   output-dir: docs
   execute-dir: project
 number-sections: false
-toc: true
+toc: false
 toc-location: left
 date: last-modified
 output:
