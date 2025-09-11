@@ -16,6 +16,7 @@ library(gt)
 library(ggplot2)
 library(ggiraph)
 library(tidygeocoder)
+library(sf)
 
 url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
@@ -25,29 +26,32 @@ df <- read_html(url) %>%
     html_table(fill = TRUE) %>%
     clean_names() %>%
     mutate(
+        museum = str_remove(museum,  "\\s*\\([^\\)]+\\)") %>% str_trim(), 
+        address = paste(museum, country_and_city, sep = ", "),
+        address = case_when(
+            address %in% c("Gyeongju National Museum, Gyeongju",
+                "National Museum of Modern and Contemporary Art, Gwacheon",
+                "National Museum of Modern and Contemporary Art, Seoul", 
+                "National Museum of Korea, Seoul", 
+                "National Folk Museum of Korea, Seoul") ~ paste0(address, ", South Korea"),
+            TRUE ~ address
+        ),
         visitors_annually = str_replace_all(visitors_annually, ", ", ","), 
         year = str_extract(visitors_annually, "(?<=\\().+(?=\\))") %>% as.numeric(), 
         visitors = str_extract(visitors_annually, "^[^\\s]+") %>% str_replace_all(., ",", ""),
         visitors = case_when( # fix value of NPG
             museum == "National Portrait Gallery" ~ "1578065",
             TRUE ~ visitors),
-        visitors = as.numeric(visitors), 
+        visitors = as.numeric(visitors)/1000000, 
         rank = rank(-visitors)
         ) %>%
-    select(rank, museum, country_and_city, year, visitors) %>% 
-    arrange(rank) %>%
-    mutate(address = paste(museum, country_and_city, sep = ", "),
-        visitors_millions = visitors/1000000)
-    
-    #  %>% 
-    # geocode(address, method = 'osm', full_results = TRUE)
-
-# test <- df %>%
-#     geocode(address, method = 'arcgis', full_results = TRUE)
-
-# osm <- df %>%
-#     geocode(address, method = 'osm', full_results = TRUE)
-
+    geocode(address, method = 'arcgis', full_results = TRUE) %>%
+    select(rank, museum, visitors, year, address, 
+        lat, long, 
+        score = attributes.Score,
+        iso3 = attributes.Country,
+        country = attributes.CntryName) %>%
+    arrange(rank)
 
 ```
 
@@ -56,11 +60,16 @@ df <- read_html(url) %>%
 # Barplot
 
 p <- ggplot(df %>% 
-    filter(rank <= 10), aes(x=reorder(museum, visitors_millions), y=visitors_millions)) + 
-    geom_bar_interactive(aes(tooltip = visitors_millions), 
+    filter(rank <= 10), 
+    aes(x = reorder(museum, visitors), 
+        y = visitors)) + 
+    geom_bar_interactive(aes(tooltip = visitors), 
         stat = "identity",
         fill = "steelblue") + 
-    labs(x = "", y = "Visitors in 2024* (millions)") +
+    labs(
+        title = "Title",
+        x = "", 
+        y = "Visitors in 2024* (millions)") +
     scale_y_continuous(
         expand = c(0,0), 
         position = "right",
@@ -72,7 +81,9 @@ p <- ggplot(df %>%
         axis.line = element_line(color = "black", linewidth = 0.5),
         axis.line.y = element_line(),
         axis.line.x.top = element_line(color = "black"),  # show top x-axis line
-
+        # title position 
+        plot.title.position = "plot", 
+        plot.caption.position =  "plot",
         # Margin for top axis title and ticks
         axis.title.x.top = element_text(margin = margin(b = 10)),
         axis.text.x.top = element_text(margin = margin(b = 5)),
@@ -86,8 +97,20 @@ p <- ggplot(df %>%
 
     )
 
+girafe(ggobj = p, width_svg = 8, height_svg = 6)
 
-girafe(ggobj = p, width = 10, height = 6)
 
+```
 
+```{r}
+
+# df_sf <- st_as_sf(df, coords = c("long", "lat"))
+
+# ggplot() +
+#   geom_point(data = df, aes(x = long, y = lat, size = visitors)) + scale_size(
+#     range = c(1, 9),
+#     guide = guide_legend(
+#       direction = "horizontal",
+#       nrow = 1,
+#       label.position = "bottom"))
 ```
