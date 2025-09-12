@@ -33,6 +33,16 @@ library(gdtools)
 library(gfonts)
 library(systemfonts)
 
+# 2018 
+url2018 <- "https://en.wikipedia.org/w/index.php?title=List_of_most-visited_art_museums&oldid=932002718"
+
+# 2020
+url2020 <- "https://web.archive.org/web/20211023064151/https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
+
+# 2022
+url2022 <- "https://web.archive.org/web/20231014150137/https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
+
+# most recent article for 2024
 url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
 # get url, table, clean column names
@@ -73,6 +83,39 @@ write_delim(df, paste0("./data/out/most_visited_museums_2024.csv"))
 ```
 
 ```{r}
+
+# data for 2018
+df2018 <- read_html(url2018) %>%
+    html_node("table.wikitable") %>%
+    html_table(fill = TRUE) %>%
+    clean_names() %>%
+    select(rank = art_museums,
+        museum = art_museums_2,
+        city = art_museums_3,
+        visitors_2018 = art_museums_4) %>%
+    filter(rank != "N.")
+    
+# data for 2020
+df2020 <- read_html(url2020) %>%
+    html_node("table.wikitable") %>%
+    html_table(fill = TRUE) %>%
+    clean_names() %>%
+    select(rank = n,
+        museum = art_museums_2,
+        city = art_museums_3,
+        visitors_2020 = visitors_annualy_a)
+
+# data for 2020
+df2022 <- read_html(url2022) %>%
+    html_node("table.wikitable") %>%
+    html_table(fill = TRUE) %>%
+    clean_names() %>%
+    select(rank, museum,
+        city = country_and_city,
+        visitors_2022 = visitors_annually)
+
+```
+```{r}
 #| warning: false
 #| error: false
 
@@ -91,6 +134,11 @@ mcb_palette <- c(
   "White" = "#F2EEE3",
   "Grey" = "#A49E94"
 )
+
+z <- df %>% group_by(iso3) %>%
+    summarise(visitors = sum(visitors)) %>%
+    arrange(-visitors)
+
 
 p <- ggplot(df %>% 
     filter(rank <= 10), 
