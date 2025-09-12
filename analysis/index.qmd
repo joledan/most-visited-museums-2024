@@ -32,9 +32,15 @@ library(showtext)
 library(gdtools)
 library(gfonts)
 library(systemfonts)
+library(fuzzyjoin)
+library(stringdist)
+library(countrycode)
 
 # 2018 
 url2018 <- "https://en.wikipedia.org/w/index.php?title=List_of_most-visited_art_museums&oldid=932002718"
+
+# 2019
+url2019 <- "https://web.archive.org/web/20201206221159/https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
 # 2020
 url2020 <- "https://web.archive.org/web/20211023064151/https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
@@ -43,10 +49,10 @@ url2020 <- "https://web.archive.org/web/20211023064151/https://en.wikipedia.org/
 url2022 <- "https://web.archive.org/web/20231014150137/https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
 # most recent article for 2024
-url <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
+url2024 <- "https://en.wikipedia.org/wiki/List_of_most-visited_art_museums"
 
 # get url, table, clean column names
-df <- read_html(url) %>%
+df <- read_html(url2024) %>%
     html_node("table.wikitable") %>%
     html_table(fill = TRUE) %>%
     clean_names() %>%
@@ -61,9 +67,8 @@ df <- read_html(url) %>%
                 "National Folk Museum of Korea, Seoul") ~ paste0(address, ", South Korea"),
             TRUE ~ address
         ),
-        visitors_annually = str_replace_all(visitors_annually, ", ", ","), 
-        year = str_extract(visitors_annually, "(?<=\\().+(?=\\))") %>% as.numeric(), 
-        visitors = str_extract(visitors_annually, "^[^\\s]+") %>% str_replace_all(., ",", ""),
+        visitors = str_extract(visitors_annually, "^[^\\s]+") %>% str_replace_all(., c("," = "", ", " = "")),
+        year = str_extract(visitors, "(?<=\\().+(?=\\))") %>% as.numeric(), 
         visitors = case_when( # fix value of NPG
             museum == "National Portrait Gallery" ~ "1578065",
             TRUE ~ visitors),
@@ -84,43 +89,87 @@ write_delim(df, paste0("./data/out/most_visited_museums_2024.csv"))
 
 ```{r}
 
-# data for 2018
-df2018 <- read_html(url2018) %>%
-    html_node("table.wikitable") %>%
-    html_table(fill = TRUE) %>%
-    clean_names() %>%
-    select(rank = art_museums,
-        museum = art_museums_2,
-        city = art_museums_3,
-        visitors_2018 = art_museums_4) %>%
-    filter(rank != "N.")
-    
-# data for 2020
-df2020 <- read_html(url2020) %>%
-    html_node("table.wikitable") %>%
-    html_table(fill = TRUE) %>%
-    clean_names() %>%
-    select(rank = n,
-        museum = art_museums_2,
-        city = art_museums_3,
-        visitors_2020 = visitors_annualy_a)
+# rename columns
+new_names <- c(rank = "art_museums",
+    rank = "n",
+    rank = "rank_in_2024_1",
+    museum = "art_museums_2",
+    city = "art_museums_3",
+    city = "country_and_city",
+    visitors = "art_museums_4",
+    visitors = "annual_visitation_figures_for_2019_as_reported_by_the_art_newspaper",
+    visitors = "visitors_annualy_a",
+    visitors = "visitors_annually_a",
+    visitors = "visitors_annually")
 
-# data for 2020
-df2022 <- read_html(url2022) %>%
+# function to scrape tables
+scrape_table <- . %>%
+    read_html() %>%
     html_node("table.wikitable") %>%
     html_table(fill = TRUE) %>%
     clean_names() %>%
-    select(rank, museum,
-        city = country_and_city,
-        visitors_2022 = visitors_annually)
+    rename(any_of(new_names)) %>%
+    select(rank, museum, city, visitors) %>%
+    mutate(visitors = str_extract(visitors, "^[^\\s]+") %>% str_replace_all(., c("," = "", ", " = ",")) %>% as.numeric(.),
+        address = paste(museum, city, sep = ", ")) %>%
+    filter(!is.na(visitors))
 
-```
+df2018 <- url2018 %>%
+    scrape_table() %>%
+    mutate(year = 2018,
+        rank = rank(-visitors)) %>%
+    filter(rank <= 20)
+
+df2020 <- url2020 %>%
+    scrape_table() %>%
+    mutate(year = 2020)
+
+df2022 <- url2022 %>%
+    scrape_table() %>%
+    mutate(year = 2022)
+
+df2019 <- url2019 %>%
+    scrape_table() %>%
+    mutate(year = 2019) %>%
+    filter(rank <= 30)
+
+df2024 <- url2024 %>%
+    scrape_table() %>%
+    mutate(year = 2024,
+        visitors = case_when(
+            museum == "National Portrait Gallery" ~ 1578065,
+            TRUE ~ visitors),
+        rank = rank(-visitors)) %>%
+    filter(rank <= 30)
+
+# cleaned names 
+cleaned_museums <- read_csv("./data/out/museums_cleaned.csv") %>%
+    rename(address = original_name,
+        address_cleaned = standard_name)
+
+df <- bind_rows(df2019, df2024) %>%
+    arrange(address) %>%
+    left_join(cleaned_museums) %>%
+    select(address = address_cleaned, rank, year, visitors) %>%
+    group_by(address, year) %>%
+    summarise(visitors = sum(visitors), .groups = "drop") %>%
+    group_by(year) %>%
+    mutate(rank = rank(-visitors),
+        address = str_remove(address,  "\\s*\\([^\\)]+\\)")) %>%
+    group_by(address) %>%
+    mutate(n = n())
+
+write_delim(df, paste0("./data/out/top30_museums_2019_2024.csv"))
+
+``` 
 ```{r}
 #| warning: false
 #| error: false
 
 # read data from previous scraping
-df <- read_delim(paste0("./data/out/most_visited_museums_2024.csv")) %>% mutate(visitors = round(visitors, 1))
+df <- read_delim(paste0("./data/out/top30_museums_2019_2024.csv")) %>%
+    mutate(visitors = round(visitors/1000000, 1))
+#%>% mutate(visitors = round(visitors, 1))
 
 # colour palette
 mcb_palette <- c(
@@ -135,14 +184,10 @@ mcb_palette <- c(
   "Grey" = "#A49E94"
 )
 
-z <- df %>% group_by(iso3) %>%
-    summarise(visitors = sum(visitors)) %>%
-    arrange(-visitors)
-
 
 p <- ggplot(df %>% 
-    filter(rank <= 10), 
-    aes(x = reorder(museum, visitors), 
+    filter(rank <= 10 & year == 2024), 
+    aes(x = reorder(address, visitors), 
         y = visitors)) + 
     geom_bar_interactive(aes(tooltip = visitors), 
         stat = "identity",
@@ -195,18 +240,89 @@ girafe(ggobj = p, width_svg = 8, height_svg = 6)
 
 ```
 
+```{r}
+# with 2
+df_both <- df %>% filter(n == 2) %>%
+    group_by(address) %>% 
+    mutate(avg_rank = mean(rank))
 
+df_hl <- df_both %>% filter(avg_rank <= 10)
+df_gy <- df_both %>% filter(avg_rank > 10)
+
+slope <- ggplot() +
+    geom_line(data = df_gy, aes(x = year, y = visitors, group = address, alpha = 0.6), color = mcb_palette["Grey"], linewidth = 4) +
+    geom_point(data = df_gy, aes(x = year, y = visitors, group = address, color = address, alpha = 0.6), color = mcb_palette["Grey"], size = 4) +
+    geom_line(data = df_hl, aes(x = year, y = visitors, group = address, color = address), linewidth = 4) +
+    geom_point(data = df_hl, aes(x = year, y = visitors, group = address, color = address), size = 4) +
+    geom_text_repel(
+    data = df_hl %>% filter(year == 2024),
+        aes(x = year, y = visitors, label = address),
+    direction = "y",       # Keep labels aligned horizontally
+    hjust = 0,             # Anchors label to the left of the point
+    nudge_x = 0.15,         # Push labels slightly right
+    segment.color = NA     # Remove lines connecting to points
+    ) +
+    theme_minimal(base_family = "Sora") + 
+    scale_x_continuous(
+        breaks = c(2019, 2024),
+        limits = c(2019, 2026),
+        position = "top") +
+    scale_y_continuous(
+        expand = c(0, 0), 
+        breaks = c(0, 2, 4, 8, 10),
+        limits = c(2, 10)) +
+    scale_color_manual(values = unname(mcb_palette)) +
+    theme(
+        legend.position="none",
+        plot.margin = unit(c(10, 10, 10, 10), "pt"),
+        text = element_text(family = "Sora"),
+        # Axis lines
+        #axis.line = element_line(color = "black", linewidth = 0.5),
+        #axis.line.y = element_line(linewidth = 1, color = mcb_palette["Charcoal"]),
+        #axis.line.x = element_line(linewidth = 1, color = mcb_palette["Charcoal"]),
+        #axis.line.x.top = element_line(color = "black"),  # show top x-axis line
+        # text
+        plot.title = element_text(face = "bold", size = 20, margin = margin(t=0, r=0, b=5, l=0, "pt")),
+        plot.subtitle = element_text(size = 14, margin = margin(t=0, r=0, b=10, l=0, "pt")),
+        plot.caption = element_text(hjust = 0, margin = margin(t=10, r=0, b=0, l=0, "pt")), 
+
+        # title, subtitle position 
+        plot.title.position = "plot", 
+        plot.caption.position =  "plot",
+        # margin for top axis title and ticks
+        #axis.title.x.top = element_text(margin = margin(b = 10)),
+        axis.text.x.top = element_text(margin = margin(b = 5), size = 12),
+        axis.text.y = element_text(hjust = 0, size = 12, margin = margin(t=0, r=0, b=0, l=-12, "pt")),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        # Optional: give plot more breathing room
+        #plot.margin = margin(t = 20, r = 20, b = 20, l = 20),
+        # grid lines
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()
+    )
+
+slope
+```
 ```{r}
 
-# df_sf <- st_as_sf(df, coords = c("long", "lat"))
+# mosaic
+df2024 <- read_delim(paste0("./data/out/most_visited_museums_2024.csv")) %>%
+    group_by(address, iso3) %>%
+    summarise(visitors = sum(visitors),
+        lat = max(lat),
+        long = max(long), .groups = "drop") %>%
+    mutate(rank = rank(-visitors),
+        continent = countrycode(sourcevar = iso3,
+                         origin = "iso3c", # Or the relevant origin code
+                         destination = "continent")) %>%
+    filter(rank <= 100) %>%
+    arrange(rank) %>%
+    group_by(continent) %>%
+    mutate(region_rank = rank(-visitors),
+        share = visitors/ sum(visitors)) %>%
+    select(rank, address, visitors, iso3, continent, region_rank, share)
 
-# ggplot() +
-#   geom_point(data = df, aes(x = long, y = lat, size = visitors)) + scale_size(
-#     range = c(1, 9),
-#     guide = guide_legend(
-#       direction = "horizontal",
-#       nrow = 1,
-#       label.position = "bottom"))
-
-
+dfeu <- df2024 %>% filter(continent == "Europe")
 ```
