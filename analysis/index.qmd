@@ -8,10 +8,9 @@ format:
 
 ## To-do
 
-- [ ] Bubble plot
-- [ ] Add flags
 - [ ] Writing 
 - [ ] Fix spacing in text 
+- [ ] Top 300 paintings
 
 ```{r}
 #| output: false
