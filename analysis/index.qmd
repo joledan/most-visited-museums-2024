@@ -50,19 +50,88 @@ mcb_palette <- c(
 ```
 
 ```{r}
+
+jtheme <- function(
+    gridline_x = FALSE, 
+    gridline_y = FALSE, 
+    axis_text = FALSE, 
+    axis_ticks = FALSE) {
+
+    # function to test conditions
+    element_or_blank <- function(cond, el) {
+        if (isTRUE(cond)) el else element_blank()
+    }
+    gridline_x <- element_or_blank(gridline_x, gridline)
+    # gridlines 
+    gridline <- element_line(
+        linetype = "dashed",
+        linewidth = 0.15,
+        color = "#A49E94"
+    )
+    gridline_x <- element_or_blank(gridline_x, gridline)
+    gridline_y <- element_or_blank(gridline_y, gridline)
+
+    # axis text, ticks
+    axis_text <- element_or_blank(axis_text, element_text(size = 12, color = "#2E2E2E"))
+    axis_ticks_line <- element_or_blank(axis_ticks, element_line(linetype = "solid", linewidth = 0.25, color = "#A49E94"))
+    axis_ticks_length_x <- if (isTRUE(axis_ticks)) unit(4, units = "pt") else element_blank()
+
+    # minimal
+    theme_minimal(
+        base_family = "Sora"
+    ) +
+    theme(
+        plot.margin = unit(c(10, 10, 10, 10), "pt"),
+        # text elements
+        plot.title = element_text(
+            face = "bold", 
+            color = "#2E2E2E",
+            size = 20, 
+            margin = margin(t=0, r=0, b=10, l=0, "pt")),
+        plot.subtitle = element_text(
+            color = "#2E2E2E",
+            size = 14, 
+            margin = margin(t=0, r=0, b=10, l=0, "pt")),
+        plot.caption = element_text(
+            color = "#2E2E2E",
+            size = 12,
+            hjust = 0, 
+            margin = margin(t=10, r=0, b=0, l=0, "pt")), 
+        axis.text = axis_text,
+        # elements
+        legend.position="none",
+
+        # gridlines
+        panel.grid.major.x = gridline_x,
+        panel.grid.major.y = gridline_y,
+        panel.grid.minor = element_blank(),
+    
+        # positions 
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+
+        # axis x line ticks
+        axis.ticks.x = axis_ticks_line,
+        axis.ticks.x.length = axis_ticks_length_x
+    )
+}
+
+
+```
+
+```{r}
 #| warning: false
 #| error: false
 
 # read data from previous scraping
 df <- read_delim(paste0("./data/out/museums_cleaned_2019_2024.csv")) %>%
     mutate(visitors = round(visitors/1000000, 1),
-        address = paste(museum, city, sep = ", "))
+        address = paste(museum, city, sep = ", ")) 
 
-p <- ggplot(df %>% 
-    filter(rank <= 10 & year == 2024), 
+p <- ggplot(df %>% filter(rank <= 10, year == 2024), 
     aes(x = reorder(address, visitors), 
         y = visitors)) + 
-    geom_bar_interactive(aes(tooltip = visitors), 
+    geom_bar(
         stat = "identity",
         fill = mcb_palette["Blue"]) + 
     geom_text(aes(label = visitors, y = visitors-0.5), 
@@ -74,40 +143,14 @@ p <- ggplot(df %>%
         title = "Down the back, but who cares, still the Louvre",
         subtitle = "Number of visitors in 2024*, millions",
         caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
-        x = "", 
-        y = "") +
+        x = NULL, 
+        y = NULL) +
     scale_y_continuous(
         expand = c(0,0), 
         position = "right") + 
     coord_flip() + 
-    theme_minimal(base_family = "Sora") + 
-    theme(
-        plot.margin = unit(c(10, 10, 10, 10), "pt"),
-        text = element_text(family = "Sora"),
-        # Axis lines
-        axis.line = element_blank(),
-        axis.line.y = element_blank(),
-        axis.line.x = element_blank(),
-        #axis.line.x.top = element_line(color = "black"),  # show top x-axis line
-        # text
-        plot.title = element_text(face = "bold", size = 20, margin = margin(t=0, r=0, b=5, l=0, "pt")),
-        plot.subtitle = element_text(size = 14, margin = margin(t=0, r=0, b=10, l=0, "pt")),
-        plot.caption = element_text(hjust = 0, margin = margin(t=10, r=0, b=0, l=0, "pt")), 
+    jtheme()
 
-        # title, subtitle position 
-        plot.title.position = "plot", 
-        plot.caption.position =  "plot",
-        # margin for top axis title and ticks
-        #axis.title.x.top = element_text(margin = margin(b = 10)),
-        axis.text.x.top = element_blank(),
-        axis.text.y = element_text(hjust = 0, size = 12, margin = margin(t=0, r=0, b=0, l=-12, "pt")),
-        # Optional: give plot more breathing room
-        #plot.margin = margin(t = 20, r = 20, b = 20, l = 20),
-        # grid lines
-        panel.grid = element_blank()
-        #panel.grid.minor.x = element_blank(),
-        #panel.grid.major.y = element_blank(
-    )
 
 girafe(ggobj = p, width_svg = 8, height_svg = 6)
 
@@ -120,24 +163,36 @@ df_both <- df %>%
     group_by(museum) %>% 
     mutate(avg_rank = mean(rank),
         diff = lead(visitors) - visitors,
-        diff = max(diff, na.rm = T))
+        diff = max(diff, na.rm = T),
+        address = str_trim(address))
 
 df_hl <- df_both %>% filter(avg_rank <= 10)
 df_gy <- df_both %>% filter(avg_rank > 10)
 
 slope <- ggplot() +
-    geom_line(data = df_gy, aes(x = year, y = visitors, group = address, alpha = 0.6), color = mcb_palette["Grey"], linewidth = 4) +
-    geom_point(data = df_gy, aes(x = year, y = visitors, group = address, color = address, alpha = 0.6), color = mcb_palette["Grey"], size = 4) +
-    geom_line(data = df_hl, aes(x = year, y = visitors, group = address, color = address), linewidth = 4) +
-    geom_point(data = df_hl, aes(x = year, y = visitors, group = address, color = address), size = 4) +
+    geom_line(data = df_gy, 
+        aes(x = year, y = visitors, group = address, alpha = 0.6), 
+        color = mcb_palette["Grey"], 
+        linewidth = 4) +
+    geom_point(data = df_gy, 
+        aes(x = year, y = visitors, group = address, color = address, alpha = 0.6), 
+        color = mcb_palette["Grey"],
+        size = 4) +
+    geom_line(data = df_hl, 
+        aes(x = year, y = visitors, group = address, color = address), linewidth = 4) +
+    geom_point(data = df_hl, 
+        aes(x = year, y = visitors, group = address, color = address), size = 4) +
     geom_text_repel(
         data = df_hl %>% filter(year == 2024),
             aes(x = year, y = visitors, label = address),
         family = "Sora",
         direction = "y", 
         hjust = 0,
-        vjust = 1,
+        vjust = 0.5,
         nudge_x = 0.1, 
+        box.padding = 0,
+        point.padding = 0, 
+        min.segment.length = 0,
         segment.color = NA
         ) +
     scale_x_continuous(
@@ -147,36 +202,15 @@ slope <- ggplot() +
     scale_y_continuous(
         expand = c(0, 0), 
         breaks = c(0, 2, 4, 8, 10),
-        limits = c(2, 10)) +
+        limits = c(0.5, 10)) +
+    labs(
+        title = "Down the back, but who cares, still the Louvre",
+        subtitle = "Number of visitors in 2024*, millions",
+        caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
+        x = NULL, 
+        y = NULL) +
     scale_color_manual(values = unname(mcb_palette)) +
-    theme_minimal(base_family = "Sora") + 
-    theme(
-        legend.position="none",
-        plot.margin = unit(c(10, 10, 10, 10), "pt"),
-        text = element_text(family = "Sora"),
-        # Axis lines
-        #axis.line = element_line(color = "black", linewidth = 0.5),
-        #axis.line.y = element_line(linewidth = 1, color = mcb_palette["Charcoal"]),
-        #axis.line.x = element_line(linewidth = 1, color = mcb_palette["Charcoal"]),
-        #axis.line.x.top = element_line(color = "black"),  # show top x-axis line
-        # text
-        plot.title = element_text(face = "bold", size = 20, margin = margin(t=0, r=0, b=5, l=0, "pt")),
-        plot.subtitle = element_text(size = 14, margin = margin(t=0, r=0, b=10, l=0, "pt")),
-        plot.caption = element_text(hjust = 0, margin = margin(t=10, r=0, b=0, l=0, "pt")), 
-        # title, subtitle position 
-        plot.title.position = "plot", 
-        plot.caption.position =  "plot",
-        # margin for top axis title and ticks
-        #axis.title.x.top = element_text(margin = margin(b = 10)),
-        axis.text.x.top = element_text(margin = margin(b = 5), size = 12),
-        axis.text.y = element_text(hjust = 0, size = 12, margin = margin(t=0, r=0, b=0, l=-12, "pt")),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        # grid lines
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank()
-    )
+    jtheme()
 
 slope
 ```
@@ -208,37 +242,23 @@ p2 <- ggplot(df2, aes(x = 1, y = n, fill = continent)) +
     geom_text(aes(
             x = 1.3, 
             y = position, 
-            label = continent,
+            label = paste(continent, n, sep = ", "),
             color = continent),
             family = "Sora", 
             hjust = 0, size = 4) +
     coord_flip(clip = "off") +
     scale_y_continuous(limits = c(0, 105), expand = c(0, 0)) +  # Remove padding on y-axis (bar length)
-    scale_x_continuous( expand = c(0, 0)) +  # Remove padding on x-axis (position axis) +
-    theme_minimal(base_family = "Sora") +
+    scale_x_continuous(expand = c(0, 0)) +  # Remove padding on x-axis (position axis) +
     scale_color_manual(values = continent_colors) +
     scale_fill_manual(values = continent_colors) +
     labs(
         title = "Witty title",
         subtitle = "Number of museums in the top 100 most visited in 2024*",
         caption = "Source: Wikipedia, Art Newspaper. *Most recent visitor values from 2023 or 2024.",
-        x = "", 
-        y = "") +
-    theme(
-        legend.position="none",
-        plot.margin = margin(t=0, r=0, b=0, l=0),
-        axis.text.y = element_blank(),
-        axis.ticks.x = element_line(color = mcb_palette["Grey"]),
-        axis.ticks.length = unit(5, "pt"), 
-        axis.title = element_blank(),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        plot.title = element_text(face = "bold", size = 20, margin = margin(t=0, r=0, b=10, l=0, "pt")),
-        plot.subtitle = element_text(size = 14, margin = margin(t=0, r=0, b=20, l=0, "pt")),
-        plot.caption = element_text(hjust = 0, margin = margin(t=10, r=0, b=0, l=0, "pt"))
-        )
+        x = NULL, 
+        y = NULL) +
+    jtheme(axis_text = FALSE) 
+
 
 girafe(ggobj = p2, width_svg = 10, height_svg = 3)
 
