@@ -96,6 +96,7 @@ write_delim(results, paste0("./data/out/museums_standardized.csv"))
 
 
 #### read standardized names, and clean up results ####
+df <- read_delim(paste0("./data/out/museums_raw_2019_2024.csv"))
 museums_std <- read_delim(paste0("./data/out/museums_standardized.csv")) %>%
     rename(museum = original_name)
 
@@ -120,7 +121,8 @@ df1 <- df %>%
             museum_name %in% c("National Museum of Modern and Contemporary Art, Seoul", "National Museum of Modern and Contemporary Art") ~ "National Museum of Modern and Contemporary Art, Seoul",
             str_detect(museum, "Donald W. Reynolds Center") ~ "Smithsonian American Art Museum and National Portrait Gallery",
             museum_name == "Shanghai Museum East" ~ "Shanghai Museum",
-            TRUE ~ museum_name)
+            TRUE ~ museum_name),
+        city = case_when(str_detect(city, "New York") ~ "New York City", TRUE ~ city)
     ) %>%
     group_by(museum = museum_std, city, country, year) %>%
     summarise(visitors = sum(visitors)) %>%
@@ -133,4 +135,31 @@ df1 <- df %>%
     group_by(museum, city, country, continent) %>%
     mutate(n = n())
 
+
 write_delim(df1, paste0("./data/out/museums_cleaned_2019_2024.csv"))
+
+
+# top 300
+url_top300 <- "https://culturalindex.substack.com/p/most-recognizable-paintings-revisited"
+
+# extract table
+top300 <- read_html(url_top300)
+df <- top300 %>%
+    html_nodes("p") %>%
+    html_text()
+
+# combine into one string
+all_text <- paste(df, collapse = "\n")
+
+# extract lines that start with a digit
+p <- str_extract_all(all_text, "\\d+\\.\\s.*")[[1]]
+
+# convert to df
+dfp <- tibble(rank = seq_along(p), painting = p) %>%
+    filter(rank != 1) %>%
+    separate_wider_delim(painting, delim = "; ",  names = c("title", "artist", "museum", "extra"), too_few = "debug") %>%
+    mutate(title = if_else(str_detect(title, "244. Paris Street"), paste(title, artist, sep = "; "), title),
+        artist = if_else(str_detect(title, "244. Paris Street"), museum, artist),
+        museum = if_else(str_detect(title, "244. Paris Street"), extra, museum)) %>%
+    select(-c(extra, starts_with("painting_"), rank)) %>%
+    separate_wider_regex(title, c(rank = "\\d+\\.", title = ".*"))
