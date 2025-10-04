@@ -30,6 +30,8 @@ library(showtext)
 library(gfonts)
 library(systemfonts)
 library(ggrepel)
+library(countrycode)
+library(ggflag)
 
 # colour palette
 mcb_palette <- c(
@@ -146,6 +148,7 @@ jtheme <- function(
 # read data from previous scraping
 df <- read_delim(paste0("./data/out/museums_cleaned_2019_2024.csv")) %>%
     mutate(visitors = round(visitors/1000000, 1),
+        city = case_when(str_detect(city, "New York") ~ "New York City", TRUE ~ city),
         address = paste(museum, city, sep = ", ")) 
 
 p <- ggplot(df %>% filter(rank <= 10, year == 2024), 
@@ -155,7 +158,6 @@ p <- ggplot(df %>% filter(rank <= 10, year == 2024),
         stat = "identity",
         fill = mcb_palette["Blue"]) + 
     geom_text(aes(label = visitors, y = visitors-0.5), 
-        #position = position_stack(vjust = 0.9), 
         color = mcb_palette["White"],  # Text color inside bar
         family = "Sora", 
         size = 5) +
@@ -165,18 +167,67 @@ p <- ggplot(df %>% filter(rank <= 10, year == 2024),
         caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
         x = NULL, 
         y = NULL) +
-    scale_y_continuous(
-        expand = c(0,0), 
-        position = "right") + 
     coord_flip() + 
-    jtheme(axis_text = TRUE, 
+    jtheme(axistext_x = TRUE, 
+        axistext_y = TRUE,
         axis_ticks = FALSE,
         axisline_y = TRUE)
-
 
 girafe(ggobj = p, width_svg = 8, height_svg = 6)
 
 ```
+
+```{r}
+
+df2 <- df %>% 
+    pivot_wider(names_from = year, 
+        values_from = c(visitors, rank),
+        values_fill = NA) %>%
+    arrange(rank_2024)
+View(df2)
+
+p1 <- ggplot(data = df2 %>% 
+        filter(!is.na(rank_2024), rank_2024 <= 10)) +
+    geom_segment(aes(y = visitors_2019, 
+        yend = visitors_2024,
+        x = museum, 
+        xend = museum),
+        color = mcb_palette["Grey"],
+        linewidth = 2) + 
+        # lineend = "butt",
+        # linejoin = "mitre",
+        # arrow = arrow(angle = 25, length = unit(0.2, "cm"),
+        #     ends = "last", type = "closed")) +
+    geom_point(
+        aes(x = reorder(museum, -rank_2024), y = visitors_2024),
+        color = mcb_palette["Orange"],
+        size = 4) +
+    geom_point(
+        aes(x = reorder(museum, -rank_2024), y = visitors_2019),
+        color = mcb_palette["Blue"],
+        size = 4) +
+    labs(
+        title = "Witty title",
+        subtitle = "Change in annual visitors*, 2019-2024, millions",
+        caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
+        x = NULL, 
+        y = NULL) +
+    coord_flip() + 
+    scale_x_discrete(expand = c(0,0.2),
+        labels = function(x) str_wrap(x, width = 25)) +
+    scale_y_continuous(expand = c(0,0), breaks = c(0,2,4,6,8,10), limits = c(0, 10)) +
+    jtheme(axistext_x = TRUE, 
+        axistext_y = TRUE,
+        axis_ticks = FALSE,
+        axisline_x = TRUE,
+        gridline_x = TRUE,
+        gridline_y = TRUE)
+    
+girafe(ggobj = p1, width_svg = 8, height_svg = 6)
+
+
+```
+
 
 ```{r}
 # with 2
@@ -300,7 +351,7 @@ p2 <- ggplot(df2, aes(x = 1, y = n, fill = continent)) +
         caption = "Source: Wikipedia, Art Newspaper. *Most recent visitor values from 2023 or 2024.",
         x = NULL, 
         y = NULL) +
-    jtheme(axis_text = FALSE) 
+    jtheme(axistext_x = FALSE) 
 
 girafe(ggobj = p2, width_svg = 10, height_svg = 3)
 
