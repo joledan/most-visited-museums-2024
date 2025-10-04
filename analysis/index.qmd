@@ -148,7 +148,6 @@ jtheme <- function(
 # read data from previous scraping
 df <- read_delim(paste0("./data/out/museums_cleaned_2019_2024.csv")) %>%
     mutate(visitors = round(visitors/1000000, 1),
-        city = case_when(str_detect(city, "New York") ~ "New York City", TRUE ~ city),
         address = paste(museum, city, sep = ", ")) 
 
 p <- ggplot(df %>% filter(rank <= 10, year == 2024), 
@@ -184,7 +183,6 @@ df2 <- df %>%
         values_from = c(visitors, rank),
         values_fill = NA) %>%
     arrange(rank_2024)
-View(df2)
 
 p1 <- ggplot(data = df2 %>% 
         filter(!is.na(rank_2024), rank_2024 <= 10)) +
