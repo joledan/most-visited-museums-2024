@@ -25,10 +25,8 @@ library(stringr)
 library(gt)
 library(ggplot2)
 library(ggiraph)
-library(tidygeocoder)
 library(sf)
 library(showtext)
-library(gdtools)
 library(gfonts)
 library(systemfonts)
 library(ggrepel)
@@ -50,17 +48,20 @@ mcb_palette <- c(
 
 ```{r}
 
+# custom theme
 jtheme <- function(
     gridline_x = FALSE, 
     gridline_y = FALSE, 
-    axis_text = FALSE, 
+    axisline_x = FALSE,
+    axisline_y = FALSE,
+    axistext_x = FALSE, 
+    axistext_y = FALSE, 
     axis_ticks = FALSE) {
 
     # function to test conditions
     element_or_blank <- function(cond, el) {
         if (isTRUE(cond)) el else element_blank()
     }
-    gridline_x <- element_or_blank(gridline_x, gridline)
     # gridlines 
     gridline <- element_line(
         linetype = "dashed",
@@ -70,10 +71,22 @@ jtheme <- function(
     gridline_x <- element_or_blank(gridline_x, gridline)
     gridline_y <- element_or_blank(gridline_y, gridline)
 
+    # axis lines
+    axisline <- element_line(
+        linetype = "solid",
+        lineend = "square",
+        linewidth = 1,
+        color = "#2E2E2E"
+    )
+    axisline_x <- element_or_blank(axisline_x, axisline)
+    axisline_y <- element_or_blank(axisline_y, axisline)
+
     # axis text, ticks
-    axis_text <- element_or_blank(axis_text, element_text(size = 12, color = "#2E2E2E"))
-    axis_ticks_line <- element_or_blank(axis_ticks, element_line(linetype = "solid", linewidth = 0.25, color = "#A49E94"))
-    axis_ticks_length_x <- if (isTRUE(axis_ticks)) unit(4, units = "pt") else element_blank()
+    axistext_x <- element_or_blank(axistext_x, element_text(size = 12, color = "#2E2E2E"))
+    axistext_y <- element_or_blank(axistext_y, element_text(size = 12, color = "#2E2E2E"))
+    axis_ticks_line <- element_or_blank(axis_ticks, 
+        element_line(linetype = "solid", linewidth = 0.8, color = "#2E2E2E",
+        lineend = "square"))
 
     # minimal
     theme_minimal(
@@ -96,7 +109,10 @@ jtheme <- function(
             size = 12,
             hjust = 0, 
             margin = margin(t=10, r=0, b=0, l=0, "pt")), 
-        axis.text = axis_text,
+
+        # axis text x, y 
+        axis.text.x = axistext_x,
+        axis.text.y = axistext_y,
         # elements
         legend.position="none",
 
@@ -111,7 +127,12 @@ jtheme <- function(
 
         # axis x line ticks
         axis.ticks.x = axis_ticks_line,
-        axis.ticks.x.length = axis_ticks_length_x
+        #axis.ticks.length.x = unit(5,"pt"),
+
+        # axis lines
+        axis.line.x = axisline_x,
+        axis.line.y = axisline_y
+        
     )
 }
 
@@ -148,7 +169,9 @@ p <- ggplot(df %>% filter(rank <= 10, year == 2024),
         expand = c(0,0), 
         position = "right") + 
     coord_flip() + 
-    jtheme()
+    jtheme(axis_text = TRUE, 
+        axis_ticks = FALSE,
+        axisline_y = TRUE)
 
 
 girafe(ggobj = p, width_svg = 8, height_svg = 6)
@@ -163,37 +186,35 @@ df_both <- df %>%
     mutate(avg_rank = mean(rank),
         diff = lead(visitors) - visitors,
         diff = max(diff, na.rm = T),
-        address = str_trim(address))
+        address = str_trim(address)) %>%
+    arrange(-diff)
 
-df_hl <- df_both %>% filter(avg_rank <= 10)
-df_gy <- df_both %>% filter(avg_rank > 10)
+# select
+gains <- c("Shanghai Museum", 
+    "Art Gallery of New South Wales", 
+    "The Museum of Modern Art")
+losses <- c("National Gallery", 
+    "Louvre Museum", 
+    "The Art Institute of Chicago")
+
+df_gains <- df_both %>% filter(museum %in% gains)
+df_losses <- df_both %>% filter(museum %in% losses)
 
 slope <- ggplot() +
-    geom_line(data = df_gy, 
-        aes(x = year, y = visitors, group = address, alpha = 0.6), 
-        color = mcb_palette["Grey"], 
-        linewidth = 4) +
-    geom_point(data = df_gy, 
+    geom_vline(xintercept = c(2019, 2024), linetype="solid", 
+                color = mcb_palette["Charcoal"], linewidth=1.5) +
+    geom_point(data = df_gains, 
         aes(x = year, y = visitors, group = address, color = address, alpha = 0.6), 
         color = mcb_palette["Grey"],
         size = 4) +
-    geom_line(data = df_hl, 
+    geom_line(data = df_gains, 
+        aes(x = year, y = visitors, group = address, alpha = 0.6), 
+        color = mcb_palette["Grey"], 
+        linewidth = 4)  +
+    geom_line(data = df_losses, 
         aes(x = year, y = visitors, group = address, color = address), linewidth = 4) +
-    geom_point(data = df_hl, 
+    geom_point(data = df_losses, 
         aes(x = year, y = visitors, group = address, color = address), size = 4) +
-    geom_text_repel(
-        data = df_hl %>% filter(year == 2024),
-            aes(x = year, y = visitors, label = address),
-        family = "Sora",
-        direction = "y", 
-        hjust = 0,
-        vjust = 0.5,
-        nudge_x = 0.1, 
-        box.padding = 0,
-        point.padding = 0, 
-        min.segment.length = 0,
-        segment.color = NA
-        ) +
     scale_x_continuous(
         breaks = c(2019, 2024),
         limits = c(2019, 2027),
@@ -208,10 +229,33 @@ slope <- ggplot() +
         caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
         x = NULL, 
         y = NULL) +
-    scale_color_manual(values = unname(mcb_palette)) +
-    jtheme()
+    scale_color_manual(values = unname(mcb_palette)) + 
+    jtheme(axistext_x = TRUE, 
+        axis_ticks = FALSE,
+        axisline_y = FALSE)
 
 slope
+
+
+
+
+    # geom_text_repel(
+    #     data = df_hl %>% filter(year == 2024),
+    #         aes(x = year, y = visitors, label = address),
+    #     family = "Sora",
+    #     direction = "y", 
+    #     hjust = 0,
+    #     vjust = 0.5,
+    #     nudge_x = 0.1, 
+    #     box.padding = 0,
+    #     point.padding = 0, 
+    #     min.segment.length = 0,
+    #     segment.color = NA
+    #     ) +
+
+
+slope
+
 ```
 
 ```{r}
@@ -257,7 +301,6 @@ p2 <- ggplot(df2, aes(x = 1, y = n, fill = continent)) +
         x = NULL, 
         y = NULL) +
     jtheme(axis_text = FALSE) 
-
 
 girafe(ggobj = p2, width_svg = 10, height_svg = 3)
 
