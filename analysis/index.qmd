@@ -47,6 +47,8 @@ mcb_palette <- c(
   "Light Grey" = "#D6D2CA"
 )
 
+plots <- paste0(getwd(), "/data/plots")
+
 ```
 
 ```{r}
@@ -237,7 +239,12 @@ df_both <- df %>%
     mutate(avg_rank = mean(rank),
         diff = lead(visitors) - visitors,
         diff = max(diff, na.rm = T),
-        address = str_trim(address)) %>%
+        address = str_trim(address),
+        case = case_when(
+            diff < 0 ~ "loss",
+            diff == 0 ~ "no change",
+            diff > 0 ~ "gain"
+    )) %>%
     arrange(-diff)
 
 df_pct <- df_both %>%
@@ -266,73 +273,25 @@ table(df_change$case)
 
 # select
 gains <- c("Shanghai Museum", 
-    "Art Gallery of New South Wales", 
     "The Museum of Modern Art")
-losses <- c("National Gallery", 
-    "Louvre Museum", 
-    "The Art Institute of Chicago")
+losses <- c("Louvre Museum", 
+    "Museo Reina Sofía")
 
-df_gains <- df_both %>% filter(museum %in% gains)
-df_losses <- df_both %>% filter(museum %in% losses)
-
-
-slope_pct <- ggplot() + 
-    geom_point(data = df_change %>% filter(case == "loss"),
-        aes(x = year, y = value, group = case),
-            color = mcb_palette["Orange"], 
-            size = 4) +
-    geom_line(data = df_change %>% filter(case == "loss"),
-        aes(x = year, y = value, group = address), 
-            color = mcb_palette["Orange"], 
-            linewidth = 2) +
-    geom_point(data = df_change %>% filter(case == "gain"),
-        aes(x = year, y = value, group = case),
-            color = mcb_palette["Blue"], 
-            size = 4) +
-    geom_line(data = df_change %>% filter(case == "gain"),
-        aes(x = year, y = value, group = address), 
-            color = mcb_palette["Blue"], 
-            linewidth = 2) +
-    geom_point(data = df_change %>% filter(case == "no change"),
-        aes(x = year, y = value, group = case),
-            color = mcb_palette["Teal"], 
-            size = 4) +
-    geom_line(data = df_change %>% filter(case == "no change"),
-        aes(x = year, y = value, group = address), 
-            color = mcb_palette["Teal"], 
-            linewidth = 2) +
-    scale_x_continuous(
-        breaks = c(2019, 2024),
-        limits = c(2019, 2024),
-        position = "top") +
-    scale_y_continuous(
-        expand = c(0, 0), 
-        breaks = c(0, 2),
-        limits = c(0.3, 3.2)) +
-    labs(
-        title = "Title",
-        subtitle = "Number of visitors, 2019 to 2024*, millions",
-        caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
-        x = NULL, 
-        y = NULL) +
-    #scale_color_manual(values = unname(mcb_palette)) + 
-    jtheme(axistext_x = TRUE, 
-        axis_ticks = FALSE,
-        axisline_y = FALSE)
-
-
-girafe(ggobj = slope_pct, width_svg = 8, height_svg = 8)
+df_gains <- df_both %>% 
+    filter(museum %in% gains) %>%
+    mutate(museum = str_replace(museum, "The Museum of Modern Art", "MoMA"))
+df_losses <- df_both %>% 
+    filter(museum %in% losses) %>%
+    mutate(museum = str_replace(museum, " Museum", ""))
 
 
 slope <- ggplot() +
     geom_line(data = df_both, 
-        aes(x = year, y = visitors, group = address), color = mcb_palette["Light Grey"], linewidth = 4) +
-    # geom_point(data = df_both, 
-    #     aes(x = year, y = visitors, group = address, alpha = 1), color = mcb_palette["Grey"], alpha = 0.5, size = 5) +
+        aes(x = year, y = visitors, group = address), color = mcb_palette["Light Grey"], linewidth = 2) +
     geom_point(data = df_gains, 
         aes(x = year, y = visitors, group = address),
         color = mcb_palette["Blue"],
-        size = 5) +
+        size = 4) +
     geom_text(data = df_losses %>% filter (year == 2019),
         aes(x = 2019, y = visitors, label = visitors),
         color = mcb_palette["Wine"],
@@ -343,35 +302,90 @@ slope <- ggplot() +
         nudge_y = -0.1,
         size = 12,
         size.unit = "pt") +
+    geom_text(data = df_losses %>% filter (year == 2024),
+        aes(x = 2024, y = visitors, label = visitors),
+        color = mcb_palette["Wine"],
+        family = "Sora",
+        hjust = 0,
+        vjust = 0,
+        nudge_x = +0.2,
+        nudge_y = -0.1,
+        size = 12,
+        size.unit = "pt") +
+    geom_text_repel(data = df_gains %>% filter (year == 2019),
+        aes(x = 2019, y = visitors, label = visitors),
+        color = mcb_palette["Blue"],
+        family = "Sora",
+        hjust = 1,
+        vjust = 0,
+        nudge_x = -0.2,
+        nudge_y = -0.1,
+        size = 4.23,
+        box.padding = 0.1) +
+    geom_text(data = df_gains %>% filter (year == 2024),
+        aes(x = 2024, y = visitors, label = visitors),
+        color = mcb_palette["Blue"],
+        family = "Sora",
+        hjust = 0,
+        vjust = 0,
+        nudge_x = +0.2,
+        nudge_y = -0.1,
+        size = 12,
+        size.unit = "pt") +
     geom_line(data = df_gains, 
         aes(x = year, y = visitors, group = address), 
         color = mcb_palette["Blue"], 
-        linewidth = 4)  +
+        linewidth = 3)  +
     geom_line(data = df_losses, 
-        aes(x = year, y = visitors, group = address), color = mcb_palette["Wine"], linewidth = 4) +
+        aes(x = year, y = visitors, group = address), color = mcb_palette["Wine"], linewidth = 3) +
     geom_point(data = df_losses, 
-        aes(x = year, y = visitors, group = address), color = mcb_palette["Wine"], size = 5) +
+        aes(x = year, y = visitors, group = address), color = mcb_palette["Wine"], size = 4) +
+    geom_text(data = df_losses %>% filter (year == 2024),
+        aes(x = year + 0.6, 
+            y = if_else(museum == "Museo Reina Sofía", visitors - 0.61, visitors - 0.1), 
+            label = str_wrap(museum, width = 12)),
+            color = mcb_palette["Wine"],
+            family = "Sora",
+            hjust = 0,
+            vjust = 0,
+            size = 12,
+            size.unit = "pt") +
+    geom_text(data = df_gains %>% filter (year == 2024),
+        aes(x = year + 0.6, 
+            y = if_else(museum == "Shanghai Museum", visitors - 0.61, visitors - 0.1), 
+            label = str_wrap(museum, width = 12)),
+            color = mcb_palette["Blue"],
+            family = "Sora",
+            hjust = 0,
+            vjust = 0,
+            size = 12,
+            size.unit = "pt") +
     scale_x_continuous(
         breaks = c(2019, 2024),
-        limits = c(2018, 2024),
+        limits = c(2018.8, 2025.7),
         position = "bottom") +
     scale_y_continuous(
         expand = c(0, 0), 
         limits = c(0.5, 10)) +
     labs(
-        title = "Title",
-        subtitle = "Change in number of visitors, 2019 to 2024*, millions",
-        caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
+        title = "Gains and losses",
+        subtitle = "Number of annual visitors, 2019 to 2024*, millions",
+        caption = paste0("Source: Wikipedia, Art Newspaper. *Most recent values\n from 2023 or 2024."),
         x = NULL, 
         y = NULL) +
-    #scale_color_manual(values = unname(mcb_palette)) + 
     jtheme(axistext_x = TRUE, 
         axis_ticks = FALSE,
         axisline_y = FALSE)
 
+# where did everyone Gogh?
+
 girafe(ggobj = slope, width_svg = 6, height_svg = 6)
 
 
+ggsave(paste0(plots, "/slope.png"), 
+    device = "png",
+    bg = "white", 
+    plot = slope, width = 6, height = 6, units = "in")
 
 
 
@@ -426,4 +440,49 @@ p2 <- ggplot(df2, aes(x = 1, y = n, fill = continent)) +
 girafe(ggobj = p2, width_svg = 10, height_svg = 3)
 
   
+```
+
+
+```{r}
+
+slope_pct <- ggplot() + 
+    geom_line(data = df_change %>% filter(case == "gain"),
+        aes(x = year, y = value, group = address), 
+            color = mcb_palette["Grey"], 
+            linewidth = 2) +
+    geom_point(data = df_change %>% filter(case == "loss"),
+        aes(x = year, y = value, group = case),
+            color = mcb_palette["Orange"], 
+            size = 4) +
+    geom_line(data = df_change %>% filter(case == "loss"),
+        aes(x = year, y = value, group = address), 
+            color = mcb_palette["Orange"], 
+            linewidth = 2) +
+    # geom_point(data = df_change %>% filter(case == "gain"),
+    #     aes(x = year, y = value, group = case),
+    #         color = mcb_palette["Grey"], 
+    #         size = 4) +
+
+    scale_x_continuous(
+        breaks = c(2019, 2024),
+        limits = c(2019, 2024),
+        position = "top") +
+    scale_y_continuous(
+        expand = c(0.1, 0), 
+        breaks = c(0, 3),
+        limits = c(0.3, 3)) +
+    labs(
+        title = "Where did everyone Gogh?",
+        subtitle = "Number of visitors, 2019 to 2024*, millions",
+        caption = "Source: Wikipedia. *Most recent visitor values from 2023 or 2024.",
+        x = NULL, 
+        y = NULL) +
+    #scale_color_manual(values = unname(mcb_palette)) + 
+    jtheme(axistext_x = TRUE, 
+        axis_ticks = FALSE,
+        axisline_y = FALSE)
+
+
+girafe(ggobj = slope_pct, width_svg = 6, height_svg = 6)
+
 ```
