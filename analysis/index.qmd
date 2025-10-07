@@ -336,6 +336,7 @@ slope <- ggplot() +
     geom_text(data = df_losses %>% filter (year == 2019),
         aes(x = 2019, y = visitors, label = visitors),
         color = mcb_palette["Wine"],
+        family = "Sora",
         hjust = 1,
         vjust = 0,
         nudge_x = -0.2,
