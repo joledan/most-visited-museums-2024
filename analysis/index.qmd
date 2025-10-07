@@ -468,8 +468,7 @@ slope_pct <- ggplot() +
         limits = c(2019, 2024),
         position = "top") +
     scale_y_continuous(
-        expand = c(0.1, 0), 
-        breaks = c(0, 3),
+        expand = c(0, 0), 
         limits = c(0.3, 3)) +
     labs(
         title = "Where did everyone Gogh?",
@@ -485,4 +484,8 @@ slope_pct <- ggplot() +
 
 girafe(ggobj = slope_pct, width_svg = 6, height_svg = 6)
 
+dfc <- df_change %>%
+    select(museum, case) %>%
+    unique()
+table(dfc$case)
 ```
